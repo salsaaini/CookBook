@@ -1,103 +1,161 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/makanan/recipe.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/menu/Detailbook.dart';
 import 'package:flutter_application_1/menu/detail_resep.dart';
+import 'package:flutter_application_1/services/category_service.dart';
 
-class ListResep extends StatelessWidget {
+class ListResep extends StatefulWidget {
+  @override
+  State<ListResep> createState() => _ListResepState();
+}
+
+class _ListResepState extends State<ListResep> {
+  final Category_service categoryService = Category_service();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(10),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 236, 234, 234),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Cari resep...",
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                ),
-              ),
+          backgroundColor: const Color.fromRGBO(254, 193, 35, 1.0),
+          title: Text(
+            'Your Recipe',
+            style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'AbhayaLibre',
+              fontSize: 26,
             ),
           ),
         ),
-        body: ListView.builder(
-          itemCount: ListFood.length,
-          itemBuilder: (context, index) {
-            final resep = ListFood[index];
-            return Card(
-              elevation: 8.0,
-              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 13, vertical: 10), // Melebarkan item
-                title: Row(
-                  children: [
-                    Container(
-                      width: 90, // Lebar gambar
-                      height: 95, // Tinggi gambar
-                      child: Image.asset(
-                        resep.gambar,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(width: 16), // Jarak antara gambar dan teks
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            resep.nama,
-                            style: TextStyle(
-                              fontSize: 18, // Ganti ukuran font sesuai kebutuhan
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            resep.asal,
-                            style: TextStyle(
-                              fontSize: 15, // Ganti ukuran font sesuai kebutuhan
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.alarm,
-                                color:  Colors.orange,
-                                size: 20,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StreamBuilder<List<DocumentSnapshot>>(
+                  stream: categoryService.getBookmark(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    List<DocumentSnapshot> bookmarks = snapshot.data!;
+
+                    return Column(
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: bookmarks.length,
+                          itemBuilder: (context, index) {
+                            var bookmarkData =
+                                bookmarks[index].data() as Map<String, dynamic>;
+                            String idMeal = bookmarkData['idMeals'];
+
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DetailRecipe(idMeal: idMeal),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                    vertical: 5, horizontal: 5),
+                                child: Material(
+                                  elevation: 1,
+                                  color: Color(0xFFD9D9D9),
+                                  borderRadius: BorderRadius.circular(11.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            bookmarkData['gambar'],
+                                            width: 90,
+                                            height: 90,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                bookmarkData['strMeal'],
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 18,
+                                                  fontFamily: 'AbhayaLibre',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text("Delete Recipe"),
+                                                  content: Text(
+                                                      "Are you sure you want to delete this recipe?"),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text("Cancel"),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        categoryService
+                                                            .deleteBookmark(
+                                                                bookmarks[index]
+                                                                    .id);
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text("Delete"),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                              SizedBox(width: 4), // Menambahkan jarak
-                              Text(resep.waktu),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailResep(resep: resep),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
+              ],
+            ),
+          ),
         ),
       ),
     );

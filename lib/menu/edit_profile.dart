@@ -1,22 +1,44 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/login1.dart';
-import 'package:flutter_application_1/menu/edit_profile.dart';
-import 'package:flutter_application_1/services/firebase_auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/menu/profile.dart';
 
-class Profile extends StatefulWidget {
+class EditProfile extends StatefulWidget {
   @override
-  State<Profile> createState() => _ProfileState();
+  State<EditProfile> createState() => _EditProfileState();
 }
 
-class _ProfileState extends State<Profile> {
-  final FirebaseAuthService _authService = FirebaseAuthService();
+class _EditProfileState extends State<EditProfile> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  //TextEditingController emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    User? currentUser = _auth.currentUser;
+
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser?.uid)
+        .get();
+
+    if (snapshot.exists) {
+      var userData = snapshot.data() as Map<String, dynamic>;
+      nameController.text = userData['fullname'] ?? '';
+      phoneController.text = userData['nomor'] ?? '';
+      //emailController.text = userData['email'] ?? '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    //var currentUser;
-    User? currentUser = FirebaseAuth.instance.currentUser;
+    User? currentUser = _auth.currentUser;
 
     return Scaffold(
       body: StreamBuilder<DocumentSnapshot>(
@@ -60,10 +82,16 @@ class _ProfileState extends State<Profile> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
                               Padding(
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  "Profile",
+                                  "Edit Profile",
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w400,
@@ -73,15 +101,16 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ),
                               IconButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EditProfile()),
-                                  );
+                                onPressed: () async {
+                                  await saveUserData();
+                                  Navigator.pop(
+                                      context); // Close the EditProfile page
+                                  // Navigate to the Profile page
+                                  Navigator.pushReplacementNamed(
+                                      context, Profile() as String);
                                 },
                                 icon: Icon(
-                                  Icons.edit,
+                                  Icons.check_rounded,
                                   color: Colors.black,
                                   size: 24,
                                 ),
@@ -110,7 +139,7 @@ class _ProfileState extends State<Profile> {
                       top: 10, bottom: 10, left: 20, right: 20),
                   child: Container(
                     padding: const EdgeInsets.all(20), // Add padding here
-                    height: 100,
+                    height: 130,
                     width: 800,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -137,12 +166,12 @@ class _ProfileState extends State<Profile> {
                           ),
                         ),
                         SizedBox(height: 5),
-                        Text(
-                          userData['fullname'] ?? 'Full name not available',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontFamily: 'AbhayaLibre',
-                            fontSize: 17,
+                        TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your name',
+                            hintStyle: TextStyle(
+                                fontFamily: 'AbhayaLibre', fontSize: 17),
                           ),
                         ),
                       ],
@@ -154,7 +183,7 @@ class _ProfileState extends State<Profile> {
                       top: 10, bottom: 10, left: 20, right: 20),
                   child: Container(
                     padding: const EdgeInsets.all(20), // Add padding here
-                    height: 100,
+                    height: 130,
                     width: 800,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -181,12 +210,12 @@ class _ProfileState extends State<Profile> {
                           ),
                         ),
                         SizedBox(height: 5),
-                        Text(
-                          userData['nomor'] ?? 'Phone number not available',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontFamily: 'AbhayaLibre',
-                            fontSize: 17,
+                        TextField(
+                          controller: phoneController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your phone number',
+                            hintStyle: TextStyle(
+                                fontFamily: 'AbhayaLibre', fontSize: 17),
                           ),
                         ),
                       ],
@@ -198,7 +227,7 @@ class _ProfileState extends State<Profile> {
                       top: 10, bottom: 10, left: 20, right: 20),
                   child: Container(
                     padding: const EdgeInsets.all(20), // Add padding here
-                    height: 100,
+                    height: 130,
                     width: 800,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -224,7 +253,7 @@ class _ProfileState extends State<Profile> {
                             fontSize: 17,
                           ),
                         ),
-                        SizedBox(height: 5),
+                        SizedBox(height: 15),
                         Text(
                           userData['email'] ?? 'Email not available',
                           style: TextStyle(
@@ -237,39 +266,6 @@ class _ProfileState extends State<Profile> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      FirebaseAuthService authService = FirebaseAuthService();
-
-                      // Panggil fungsi signOut dari FirebaseAuthService
-                      await authService.signOut();
-
-                      // Navigasi ke halaman login setelah logout
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              Login(), // Gantilah LoginPage dengan nama halaman login Anda
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      primary: Color.fromRGBO(254, 193, 35, 1.0),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 60, vertical: 20),
-                    ),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           );
@@ -277,8 +273,19 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
-}
 
-void main() {
-  runApp(Profile());
+  Future<void> saveUserData() async {
+    User? currentUser = _auth.currentUser;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser?.uid)
+        .update({
+      'fullname': nameController.text,
+      'nomor': phoneController.text,
+      //'email': emailController.text,
+    });
+
+    // Optional: Show a success message or navigate to another page
+  }
 }

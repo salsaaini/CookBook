@@ -1,281 +1,173 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/colors.dart';
-import 'package:flutter_application_1/menu/aglio.dart';
-import 'package:flutter_application_1/menu/bleu.dart';
+import 'package:flutter_application_1/services/category_service.dart';
+import 'package:flutter_application_1/model/food.dart';
+import 'package:flutter_application_1/List_category.dart';
 
-class HomeScreen extends StatelessWidget {
-  List<String> categories = [
-    "Popular Menu",
-  ];
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Category_service salsa = Category_service();
+  Food? data;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isLoading = true;
+    salsa.getFoods().then((value) {
+      setState(() {
+        data = value;
+        isLoading = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFDC022),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.notifications,
-                      color: Colors.orange,
-                      size: 30,
-                    ),
-                  ),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 70,
               ),
-            ),
-            SizedBox(
-              height: 25,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: Text(
-                "Unlock the Secrets of Delicious Cooking with Cookbook",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Unlock the Series of Delicious \nCooking with CookBook',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 23,
+                        fontFamily: 'AbhayaLibre',
+                        fontWeight: FontWeight.w800,
+                        height: 1.0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            SizedBox(height: 15),
-            Container(
-              margin: EdgeInsets.all(15),
-              height: 55,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 236, 234, 234),
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [   
-                  Icon(
-                    Icons.search,
-                    color:  Colors.orange,
-                    size: 35,
-                  ),
-                  Container(
-                    margin: EdgeInsetsDirectional.only(start: 10),
-                    height: 55,
-                    width: MediaQuery.of(context).size.width /1.5,
-                    child: Center(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          hintText: "Find your recipe...",
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ), 
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (int i = 0; i < categories.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Text(
-                        categories[i],
-                        style: TextStyle(
-                          color: i == 0 ? Colors.orange : colors.grayClr,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  height: 300,
-                  width: MediaQuery.of(context).size.width /2.1,
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 236, 234, 234),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          // Navigasi ke halaman yang sesuai saat Aglio Olio Pasta di-klik
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Aglio(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(8),
-                          height: 180,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Image.asset("images/aglio.jpg",
-                            fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        "Aglio Olio Pasta",
-                          style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        "Italia",
-                          style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black38,
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround, // Untuk membuat jarak antara elemen-elemen sepanjang row
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.alarm, // Ikon waktu (sesuaikan dengan ikon yang sesuai)
-                                color: Colors.orange,
-                                size: 20, // Warna ikon
-                              ),
-                              SizedBox(width: 5), // Jarak antara ikon dan teks
-                              Text(
-                                "30 Menit",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 13,  // Warna teks
-                                ),
-                              ),
-                            ],
-                          ),
-                          Icon(
-                            Icons.bookmark_border, // Ikon untuk menyimpan (sesuaikan dengan ikon yang sesuai)
-                            color: Colors.orange,
-                            size: 20, // Warna ikon simpan
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              SizedBox(height: 65),
+              Container(
+                height: 1400,
+                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 30.0, vertical: 20.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(0),
                 ),
-                SizedBox(height: 10),
-                InkWell(
-                  onTap: () {
-                    // Navigasi ke halaman yang sesuai saat Aglio Olio Pasta di-klik
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Bleu(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Category",
+                      style: TextStyle(
+                        color: const Color.fromRGBO(254, 193, 35, 1.0),
+                        fontSize: 23,
+                        fontFamily: 'AbhayaLibre',
+                        fontWeight: FontWeight.w800,
+                        height: 0,
                       ),
-                    );
-                  },
-                  child: Container(
-                    height: 300,
-                    width: MediaQuery.of(context).size.width /2.1,
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 236, 234, 234),
-                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(8),
-                          height: 180,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Image.asset("images/bleu.jpg",
-                            fit: BoxFit.cover,
-                            ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    if (data != null && !isLoading)
+                      Expanded(
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.8,
+                            crossAxisSpacing: 5.0,
+                            mainAxisSpacing: 5.0,
                           ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "Chicken Cordon Bleu",
-                            style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "Prancis",
-                            style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black38,
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround, // Untuk membuat jarak antara elemen-elemen sepanjang row
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.alarm, // Ikon waktu (sesuaikan dengan ikon yang sesuai)
-                                  color: Colors.orange,
-                                  size: 20, // Warna ikon
-                                ),
-                                SizedBox(width: 5), // Jarak antara ikon dan teks
-                                Text(
-                                  "40 Menit",
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 13,  // Warna teks
+                          itemCount: data!.categories.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Category category = data!.categories[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RecipeListScreen(
+                                      category: category.strCategory,
+                                    ),
                                   ),
+                                );
+                              },
+                              child: Card(
+                                color: Color(0xFFD9D9D9),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(21),
                                 ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.bookmark_border, // Ikon untuk menyimpan (sesuaikan dengan ikon yang sesuai)
-                              color: Colors.orange,
-                              size: 20, // Warna ikon simpan
-                            ),
-                          ],
+                                margin: EdgeInsets.all(5),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(21),
+                                          bottom: Radius.circular(21),
+                                        ),
+                                        child: Image.network(
+                                          category.strCategoryThumb,
+                                          height: 200,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            category.strCategory,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800,
+                                              fontFamily: 'AbhayaLibre',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+
+                    // Show a loading indicator while data is being fetched
+                    if (isLoading)
+                      Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                  ],
                 ),
-                
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
