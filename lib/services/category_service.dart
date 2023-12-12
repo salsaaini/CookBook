@@ -14,8 +14,20 @@ class Category_service {
   //   return resepStream;
   // }
 
-  Stream<List<DocumentSnapshot>> getBookmark() {
-    return bookmark.snapshots().map((snapshot) => snapshot.docs);
+  // Stream<List<DocumentSnapshot>> getBookmark() {
+  //   return bookmark.snapshots().map((snapshot) => snapshot.docs);
+  // }
+  Stream<List<DocumentSnapshot>> getBookmark(String uid) {
+    return bookmark
+        .where('uid', isEqualTo: uid)
+        .snapshots()
+        .map((QuerySnapshot query) {
+      List<DocumentSnapshot> result = [];
+      query.docs.forEach((doc) {
+        result.add(doc);
+      });
+      return result;
+    });
   }
 
   Future<void> deleteBookmark(String id) async {

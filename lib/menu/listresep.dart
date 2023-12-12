@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/menu/Detailbook.dart';
@@ -12,8 +13,23 @@ class ListResep extends StatefulWidget {
 class _ListResepState extends State<ListResep> {
   final Category_service categoryService = Category_service();
 
+  String getCurrentUserUid() {
+    // Use FirebaseAuth to get the current user
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // Check if the user is not null and return the UID
+    if (user != null) {
+      return user.uid;
+    } else {
+      // Handle the case when the user is not authenticated
+      // You can return a default value or throw an exception
+      throw Exception("User not authenticated");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String uid = getCurrentUserUid();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -35,7 +51,7 @@ class _ListResepState extends State<ListResep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 StreamBuilder<List<DocumentSnapshot>>(
-                  stream: categoryService.getBookmark(),
+                  stream: categoryService.getBookmark(uid),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return Center(
